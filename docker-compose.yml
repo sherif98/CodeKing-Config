@@ -1,0 +1,66 @@
+version: '3.3'
+
+services:
+  mongo:
+    image: mongo
+    ports:
+    - "27017:27017"
+
+  mongo-express:
+    image: mongo-express
+    ports:
+    - "9090:8081"
+    links:
+     - mongo
+
+
+  rabbitmq:
+    image: rabbitmq
+    ports:
+      - "5673:5672" #JMS Port
+      - "15673:15672" #Management Port - default user:pass = guest:guest
+
+  eurekaserver:
+    image: sherif98/service-discovery
+    ports:
+     - "8761:8761"
+#
+#  gateway:
+#    image: sherif98/apigateway
+#    ports:
+#    - "8000:8000"
+#    environment:
+#      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka
+
+  config:
+    image: sherif98/config
+    ports:
+    - "8888:8888"
+
+  gamification-service:
+    image: sherif98/gamificationservice
+    ports:
+    - "8080:8910"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_CLOUD_CONFIG_URI=http://config:8888
+
+  user-service:
+    image: sherif98/user-service
+    ports:
+    - "8081:8900"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_CLOUD_CONFIG_URI=http://config:8888
+
+
+  problemsubmission-service:
+    image: sherif98/problemsubmissionservice
+    ports:
+    - "8082:8905"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_CLOUD_CONFIG_URI=http://config:8888
